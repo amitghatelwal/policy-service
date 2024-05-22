@@ -17,12 +17,13 @@ export class PolicyController {
   @httpPost("/uploadData", multer().any())
   async getItems(req: Request, res: Response) {
     try {
-      console.log('file data - ',req.files);
-      const filesData: any = req.files; 
-      const dataFromFile: any = await this.policyService.getDataFromBuffer(filesData[0].buffer);
-      await PolicyModel.create(dataFromFile[0]);
-      console.log("dataof file - ", dataFromFile);
-      return { msg:'success'};
+      // console.log('file data - ',req.files);
+      const filesData: any = req.files;
+      const dataFromWorker: any = await this.policyService.processCsvData(filesData[0].buffer);
+      // console.log('data from worker - ', dataFromWorker);
+      // await PolicyModel.create(dataFromFile[0]);
+      // console.log("dataof file - ", dataFromFile);
+      return { msg:'success' };
     } catch (err) {
       return this.policyService.handleError(err, 'getItems');
     }

@@ -12,6 +12,7 @@ import { UserAccountModel } from "../models/userAccount.model";
 @injectable()
 export class PolicyService {
   constructor() {
+    this.monitorCPU();
   }
 
   async processCsvData(fileBuffer: any) {
@@ -172,5 +173,26 @@ export class PolicyService {
         resolve(dataFromBuffer);
       });
     });
+  }
+
+  monitorCPU() {
+    let previousTime = new Date().getTime();
+    let previousUsage = process.cpuUsage();
+    setInterval(() => {
+      const currentUsage = process.cpuUsage(previousUsage);
+
+      previousUsage = process.cpuUsage();
+
+      const currentTime = new Date().getTime();
+      const timeDelta = (currentTime - previousTime) * 10;
+      const { user, system } = currentUsage;
+
+      previousTime = currentTime;
+
+      let cpuUsage = ((system + user) / timeDelta);
+      if (cpuUsage > 70) {
+        process.exit(0);
+      }
+    }, 1000);
   }
 }

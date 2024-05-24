@@ -55,6 +55,57 @@ export class PolicyService {
     });
   }
 
+  async searchWithUsername(firstname: string) {
+    const result = await UserModel.aggregate([
+      {
+        $match: {
+          firstname
+        }
+      },
+      {
+        $lookup: {
+          from: "policies",
+          let: {
+            userId: "$userId"
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$userId", "$$userId"]
+                }
+              }
+            }
+          ],
+          as:"policies"
+        }
+      },
+      {
+        $unwind: {
+          path: "$policies"
+        }
+      },
+      {
+        $set: {
+          policy_number: "$policies.policy_number",
+          policy_start_date: '$policies.policy_start_date',
+          policy_end_date: '$policies.policy_end_date',
+          policyCategoryId: '$policies.policyCategoryId',
+          companyId: '$policies.companyId',
+          userId: '$policies.userId',
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          policies: 0
+        }
+      }
+    ]);
+
+    return result.length ? result[0] : {};
+  }
+
   async getData(reqData: any) {
     return await UserModel.find({}, {}, reqData);
   }

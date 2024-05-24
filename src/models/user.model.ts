@@ -11,6 +11,7 @@ interface IUserModel extends mongoose.Document {
   email: string;
   gender: string;
   userType: string;
+  userId: string;
 }
 
 const userSchema = new Schema(
@@ -24,6 +25,7 @@ const userSchema = new Schema(
     email: { type: String },
     gender: { type: String },
     userType: { type: String },
+    userId: { type: String }
   }
 )
 

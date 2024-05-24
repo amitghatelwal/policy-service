@@ -3,11 +3,13 @@ import { Schema } from 'mongoose';
 
 interface IPolicyCarrierModel extends mongoose.Document {
   company_name: string;
+  companyId: string;
 }
 
 const policyCarrierSchema = new Schema(
   {
-    company_name: { type: String }
+    company_name: { type: String },
+    companyId: { type: String }
   }
 )
 

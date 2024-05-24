@@ -3,11 +3,13 @@ import { Schema } from 'mongoose';
 
 interface ILobCatergoryModel extends mongoose.Document {
   category_name: string;
+  policyCategoryId: string;
 }
 
 const lobCatergorySchema = new Schema(
   {
-    category_name: { type: String }
+    category_name: { type: String },
+    policyCategoryId: { type: String }
   }
 )
 

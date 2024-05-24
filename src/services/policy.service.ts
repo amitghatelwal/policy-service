@@ -2,6 +2,12 @@ import { injectable } from "inversify";
 import { Stream } from 'stream';
 import parser from 'csv-parser';
 import { Worker } from 'worker_threads';
+import { UserModel } from "../models/user.model";
+import { AgentModel } from "../models/agent.model";
+import { LobCatergoryModel } from "../models/lob-category.model";
+import { PolicyCarrierModel } from "../models/policyCarrier.model";
+import { PolicyModel } from "../models/policy.model";
+import { UserAccountModel } from "../models/userAccount.model";
 
 @injectable()
 export class PolicyService {
@@ -11,7 +17,22 @@ export class PolicyService {
   async processCsvData(fileBuffer: any) {
     const csvData = await this.getDataFromBuffer(fileBuffer);
     const dataFromWorker = await this.postMsgToWorker(csvData);
+    let time = new Date();
+    await this.saveDataToMongo(dataFromWorker);
+    console.log("time - ", new Date().valueOf() - new Date(time).valueOf());
     return dataFromWorker;
+  }
+
+  async saveDataToMongo(dataFromWorker: any) {
+    const mongoPromises = [
+      AgentModel.insertMany(dataFromWorker.arrOfAgents),
+      LobCatergoryModel.insertMany(dataFromWorker.arrOfLobCategory),
+      PolicyCarrierModel.insertMany(dataFromWorker.arrOfCompany),
+      PolicyModel.insertMany(dataFromWorker.arrOfPolicies),
+      UserModel.insertMany(dataFromWorker.arrOfUsers),
+      UserAccountModel.insertMany(dataFromWorker.arrOfUserAccounts)
+    ]
+    return await Promise.all(mongoPromises);
   }
 
   async postMsgToWorker(data: any) {
@@ -28,14 +49,14 @@ export class PolicyService {
         reject(new Error(`Worker stopped with exit code ${code}`));
       });
       worker.on('message', (result) => {
-        console.log('result is here from worker - ', result);
+        // console.log('result is here from worker - ', result);
         resolve(result);
       });
     });
   }
 
-  async getItems(reqData: any) {
-
+  async getData(reqData: any) {
+    return await UserModel.find({}, {}, reqData);
   }
 
   async handleError(err: any, errId = '') {

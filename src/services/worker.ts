@@ -7,11 +7,12 @@ const parentPortVar: any = parentPort;
 async function processPolicyData(policyData: any): Promise<any> {
   const arrOfAgents: Array<any> = [];
   const arrOfLobCategory: Array<any> = [];
+  const arrOfPolicies: Array<any> = [];
   const arrOfCompany: Array<any> = [];
   const arrOfUsers: Array<any> = [];
-  const arrOfPolicies: Array<any> = [];
-  let categoryNameIdMap: any = {'test': 1};
-  let companyNameIdMap: any = {'test': 1};
+  const arrOfUserAccounts: Array<any> = [];
+  let categoryNameIdMap: any = {};
+  let companyNameIdMap: any = {};
   
 
   for (const dataObj of policyData) {
@@ -29,6 +30,10 @@ async function processPolicyData(policyData: any): Promise<any> {
       const companyId = uuidv4();
       companyNameIdMap[dataObj.company_name] = companyId;
       arrOfCompany.push({company_name: dataObj.company_name, companyId});
+    }
+
+    if (arrOfUserAccounts.findIndex((item: any) => item.account_name == dataObj.account_name && item.account_type == dataObj.account_type) == -1) {
+      arrOfUserAccounts.push({account_name: dataObj.account_name, account_type: dataObj.account_type});
     }
 
     const userId= uuidv4();
@@ -58,13 +63,14 @@ async function processPolicyData(policyData: any): Promise<any> {
     arrOfPolicies.push(dataForPolicy);
   }
 
-  console.log(`length of arrays -`, arrOfAgents.length, arrOfLobCategory.length, arrOfCompany.length, arrOfUsers.length,arrOfPolicies.length);
+  console.log(`length of arrays -`, arrOfAgents.length, arrOfLobCategory.length, arrOfCompany.length, arrOfUsers.length, arrOfPolicies.length, arrOfUserAccounts.length);
   return {
     arrOfAgents,
     arrOfLobCategory,
     arrOfCompany,
     arrOfUsers,
-    arrOfPolicies
+    arrOfPolicies,
+    arrOfUserAccounts
   };
 }
 

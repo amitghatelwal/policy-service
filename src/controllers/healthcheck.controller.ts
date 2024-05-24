@@ -11,7 +11,7 @@ export class HealthController {
   @httpGet("/")
   async getHealthCheck(req: Request, res: Response) {
     try {
-      await this.policyService.getItems({limit: 1});
+      await this.policyService.getData({limit: 1});
       return res.json({msg: 'success'});
     } catch (err) {
       return this.policyService.handleError(err, 'getHealthCheck');

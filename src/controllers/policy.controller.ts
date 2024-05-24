@@ -39,4 +39,18 @@ export class PolicyController {
       return this.policyService.handleError(err, 'getItems');
     }
   }
+
+
+  /**
+   * API to provide aggregated policy by each user
+   * @returns policy info of each user
+  */
+  @httpGet("/policyOfUsers")
+  async policyOfEachUser(req: Request, res: Response) {
+    try {
+      return await this.policyService.policyOfEachUser();
+    } catch (err) {
+      return this.policyService.handleError(err, 'getItems');
+    }
+  }
 }

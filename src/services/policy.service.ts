@@ -17,9 +17,7 @@ export class PolicyService {
   async processCsvData(fileBuffer: any) {
     const csvData = await this.getDataFromBuffer(fileBuffer);
     const dataFromWorker = await this.postMsgToWorker(csvData);
-    let time = new Date();
     await this.saveDataToMongo(dataFromWorker);
-    console.log("time - ", new Date().valueOf() - new Date(time).valueOf());
     return dataFromWorker;
   }
 
@@ -49,7 +47,6 @@ export class PolicyService {
         reject(new Error(`Worker stopped with exit code ${code}`));
       });
       worker.on('message', (result) => {
-        // console.log('result is here from worker - ', result);
         resolve(result);
       });
     });
@@ -104,6 +101,52 @@ export class PolicyService {
     ]);
 
     return result.length ? result[0] : {};
+  }
+
+  async policyOfEachUser() {
+    const result = await UserModel.aggregate([
+      {
+        $lookup: {
+          from: "policies",
+          let: {
+            userId: "$userId"
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$userId", "$$userId"]
+                }
+              }
+            }
+          ],
+          as:"policies"
+        }
+      },
+      {
+        $unwind: {
+          path: "$policies"
+        }
+      },
+      {
+        $set: {
+          policy_number: "$policies.policy_number",
+          policy_start_date: '$policies.policy_start_date',
+          policy_end_date: '$policies.policy_end_date',
+          policyCategoryId: '$policies.policyCategoryId',
+          companyId: '$policies.companyId',
+          userId: '$policies.userId',
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          policies: 0
+        }
+      }
+    ]);
+    console.log('er is ata - ',result);
+    return result;
   }
 
   async getData(reqData: any) {
